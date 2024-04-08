@@ -1,0 +1,10 @@
+venv/
+venv_win/
+__pycache__/
+dataset/
+pretrained_models/
+*.pyo
+*.pyc
+*.zip
+Pipfile
+.ipynb_checkpoints/
