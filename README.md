@@ -4,14 +4,13 @@ Tested on Ubuntu 20.04, Python 3.10.6 with RTX A4500 GPU.
 
 ## Experiment reproducibility
 
-The `dataset.pkl` file contains prepared dataset, which was used to
-get the scores for experiment results in the paper. In current version,
-this file should be in the root folder of the project, so it is read 
-by the `main.py` script instead of generating new voice pairs randomly.
-
-The `scores.csv` file contains experiment results when running the experiment
-with the provided `dataset.pkl` file.
-
+The 'dataset_experiment_1/' directory contains the dataset used in the first
+experiments in the paper. The 'dataset_experiment_2/' directory contains the
+dataset used in the second experiments in the paper.
+Files 'dataset_experiment_1.pkl' and 'dataset_experiment_2.json' get dataset information respectively
+After running the experiments, the 'scores_experiment_1.csv' file will contain experiment
+results of the first dataset experiment and 'scores_experiment_2.csv' will contain experiment
+results of the second dataset experiment.
 ## Get dataset
 
 The recommended way to download the dataset using git.

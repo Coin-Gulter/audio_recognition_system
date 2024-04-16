@@ -24,7 +24,7 @@ class Pipeline:
     def __call__(
             self, 
             audio1: Audio or str, 
-            audio2: Audio or str,
+            audio2: Audio or str
         ) -> Tuple[float, float]:
         if isinstance(audio1, str):
             audio1 = Audio(audio1)
@@ -39,7 +39,7 @@ class Pipeline:
         # similarity = self.score_fn(emb1, emb2)
         similarity = cosine_similarity(emb1, emb2)
         distance = euclidean_distance(emb1, emb2)
-        return (similarity, distance)
+        return (similarity, distance, emb1)
 
 
 if __name__ == "__main__":

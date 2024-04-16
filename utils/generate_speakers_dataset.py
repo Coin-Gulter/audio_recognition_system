@@ -72,6 +72,7 @@ def generate_speakers_file_pairs(speaker_to_samples_dict: dict) -> List[Tuple[st
         else:
             print("No match found for speaker in the string.")
             name = 'None'
+
         speaker_pairs[name] = same_speaker_pairs
         mix_speaker_pairs[name] = diff_speaker_pairs
         pair = same_speaker_pairs
@@ -80,3 +81,7 @@ def generate_speakers_file_pairs(speaker_to_samples_dict: dict) -> List[Tuple[st
         all_pairs_list.extend(pair)
 
     return all_pairs_dict, all_pairs_list
+
+def generate_speakers_emb_pairs(speaker_to_samples_dict: dict) -> List[Tuple[str, str]]:
+
+    pass

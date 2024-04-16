@@ -4,12 +4,13 @@ import timeit
 import numpy as np
 import pandas as pd
 import pickle as pkl
+import json
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
 
 from core import (
-    Pipeline,
+    Pipeline_avg,
     Pyannote,
     WavLM,
     TitaNet,
@@ -22,44 +23,61 @@ from core.metrics import (
 )
 from core.audio import Audio
 from core.normalize import normalize
-from utils import make_dataset
+from utils import make_dataset, make_average_emb
 
 
-def get_label(file1: str, file2: str) -> int:
+
+def get_pipeline(name: str):
+    if name == "ecapa":
+        return Ecapa()
+    elif name == "titanet":
+        return TitaNet()
+
+
+
+def get_label(emb_name: str, file: str) -> int:
     """
     Return 0 if different speakers, 1 if same speakers.
     """
-    def _get_name(x):
-        return x.split("/")[-2]
-
-    return int(_get_name(file1) == _get_name(file2))
+    return int(emb_name.split("/")[-1] == file.split("/")[-2])
 
 
 def evaluate_pipeline(
     pipeline, 
     data, 
+    pipeline_name
 ) -> pd.DataFrame:
 
     scores = []
     labels = []
+    embedings = []
     distance_self = []
     distance_other = []
     elapsed_time = []
 
-    for file1, file2 in tqdm.tqdm(data, total=len(data)):
-        
-        _st = timeit.default_timer()
-        similarity, distance = pipeline(file1, file2)
-        elapsed_time.append(timeit.default_timer() - _st)
-        
-        label = get_label(file1, file2)
-        scores.append(similarity)
-        labels.append(label)
-        
-        if label == 1:
-            distance_self.append(distance)
-        else:
-            distance_other.append(distance)
+    with open(f'./embedings/{pipeline_name}.json', 'r+') as f:
+        embedings = json.load(f)
+
+    for name, value in tqdm.tqdm(data.items(), total=len(data)):
+        name = name.split('/')[-1]
+        for file in tqdm.tqdm(value, total=len(value)):
+            print(f'{pipeline_name} - file - {file}')
+            
+            _st = timeit.default_timer()
+            similarity, distance = pipeline(np.array(embedings[name]), file)
+            elapsed_time.append(timeit.default_timer() - _st)
+            
+            label = get_label(name, file)
+            # label = 1
+
+
+            scores.append(similarity)
+            labels.append(label)
+            
+            if label == 1:
+                distance_self.append(distance)
+            else:
+                distance_other.append(distance)
 
     ee_rate, thresh, fa_rate, fr_rate = compute_eer(scores, labels)
     min_dcf = compute_min_dcf(fr_rate, fa_rate)
@@ -161,62 +179,61 @@ def make_visualization(
 def main():
 
     # Intended for experiment reproducibility
-    if os.path.exists("dataset.pkl"):
-        print("Loading dataset.pkl")
-        with open("dataset.pkl", "rb") as f:
-            dataset = pkl.load(f)
+    if os.path.exists("dataset_experiment_2.json"):
+        print("Loading dataset.json")
+        with open("dataset_experiment_2.json", "r") as f:
+            dataset = json.load(f)
     else:
         print("Generating dataset")
-        _ ,dataset  = make_dataset("./dataset")
-        print("Saving dataset.pkl")
-        with open("dataset.pkl", "wb") as f:
-            pkl.dump(dataset, f)
+        _ ,dataset  = make_dataset("./dataset_experiment_2", True)
+        print("Saving dataset.json - ", dataset)
+        with open("dataset_experiment_2.json", "+w") as f:
+            dt_js = json.dumps(dataset)
+            f.write(dt_js)
     
     print(f"Number of pairs in dataset: {len(dataset)}")
 
     # Define pipelines
     pipelines = [
-        Pipeline("pyannote", Pyannote()),
-        # Pipeline("wavlm-base", WavLM(device="cuda")),
-        # Pipeline("wavlm-base-plus", WavLM("microsoft/wavlm-base-plus", device="cuda")),
-        Pipeline("wavlm-base-sv", WavLM("microsoft/wavlm-base-sv", device="cpu")),
-        Pipeline("wavlm-base-plus-sv", WavLM("microsoft/wavlm-base-plus-sv", device="cpu")),
-        Pipeline("titanet", TitaNet()),
-        Pipeline("ecapa", Ecapa()),
+        Pipeline_avg("pyannote", Pyannote()),
+        Pipeline_avg("wavlm-base-sv", WavLM("microsoft/wavlm-base-sv", device="cpu")),
+        Pipeline_avg("wavlm-base-plus-sv", WavLM("microsoft/wavlm-base-plus-sv", device="cpu")),
+        Pipeline_avg("titanet", TitaNet()),
+        Pipeline_avg("ecapa", Ecapa()),
     ]
 
     results = {}
 
     for pipeline in pipelines:
         print(f"Evaluating pipeline: {pipeline.name}")
-        results[pipeline.name] = evaluate_pipeline(pipeline, dataset)
+        results[pipeline.name] = evaluate_pipeline(pipeline, dataset, pipeline_name=pipeline.name)
     
     # Store resutls in a csv file
-    pd.DataFrame(results).transpose().to_csv("scores.csv")
+    pd.DataFrame(results).transpose().to_csv("scores_experiment_2.csv")
 
-    # Make visualizations
-    speakers = [
-        '1-Zelenskyi',
-        '2-Sadovyi',
-        '9-Vereshchuk',
-        '10-Kuleba',
-        '25-Ustinova',
-    ]
-    markers = [
-        'o',
-        'x',
-        's',
-        '+',
-        '^',
-    ]
-    colors = [
-        'r',
-        'g',
-        'b',
-        'm',
-        'c',
-    ]
-    make_visualization(pipelines, dataset, speakers=speakers, markers=markers, colors=colors)
+    # # Make visualizations
+    # speakers = [
+    #     '1-Zelenskyi',
+    #     '2-Sadovyi',
+    #     '9-Vereshchuk',
+    #     '10-Kuleba',
+    #     '25-Ustinova',
+    # ]
+    # markers = [
+    #     'o',
+    #     'x',
+    #     's',
+    #     '+',
+    #     '^',
+    # ]
+    # colors = [
+    #     'r',
+    #     'g',
+    #     'b',
+    #     'm',
+    #     'c',
+    # ]
+    # make_visualization(pipelines, dataset, speakers=speakers, markers=markers, colors=colors)
         
     print("Done!")
 
