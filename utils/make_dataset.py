@@ -13,16 +13,29 @@ def make_dataset(dataset_dir: str, without_pairs=False) -> List[Tuple[str, str]]
     # Generate datasets for evaluation for each speaker
     print('\n\nspeakers - ' ,speakers)
     print('\n\nspeakers_to_sample - ' ,speaker_to_samples_dict)
-    full_sampples_dict = {}
+
+    speakers_samples_list = []
 
     if without_pairs:
         for s in speakers:
-            for i in range(len(speakers)):
+            speaker_temp_list = speaker_to_samples_dict[s]
+            
+            i = 0
+            while i <= len(speakers):
                 speaker = random.choice(speakers)
-                index = random.randint(0,len(speaker_to_samples_dict[speaker])-1)
-                full_sampples_dict[s] = speaker_to_samples_dict[s].append(speaker_to_samples_dict[speaker][index])
+
+                if speaker == s:
+                    continue
+                else:
+                    index = random.randint(0,len(speaker_to_samples_dict[speaker])-1)
+                    speaker_temp_list.append(speaker_to_samples_dict[speaker][index])
+                    i += 1
+
+            speakers_samples_list.append(tuple(speaker_temp_list))
+
         print('without making pairs')
-        return None, speaker_to_samples_dict
+        return speakers_samples_list
     
     dataset_dict, dataset_list  = generate_speakers_file_pairs(speaker_to_samples_dict)
-    return dataset_dict, dataset_list
+
+    return dataset_list
