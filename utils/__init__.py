@@ -4,3 +4,4 @@ from utils.generate_speakers_dataset import (
 )
 
 from utils.make_dataset import make_dataset
+from utils.make_dataset_3_4 import make_dataset_3_4

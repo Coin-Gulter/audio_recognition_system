@@ -1,0 +1,6 @@
+,pyannote,wavlm-base-sv,wavlm-base-plus-sv,titanet,ecapa
+dataset_exp_3/11labs,95,90,89,94,95
+dataset_exp_3/original,94,88,91,94,93
+dataset_exp_3/rvc,95,76,66,95,95
+dataset_exp_3/tortoise,84,61,50,83,83
+dataset_exp_3/xtts,95,74,69,95,94
