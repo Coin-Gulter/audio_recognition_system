@@ -105,6 +105,7 @@ class Pipeline:
             
         speakers_emd_dict[speaker] = speaker_embedings_dict
 
+        os.makedirs(self.cache_dir, exist_ok=True)
         with open(file_path, "+w") as f:
             f.write(json.dumps(speakers_emd_dict))        
 
