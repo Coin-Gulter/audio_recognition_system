@@ -90,6 +90,7 @@ def evaluate_pipeline(
 
     
     predictions = [True if score >= thresh else False for score in scores]
+
     percentage = int((sum(predictions) / len(predictions)) * 100)
     
     return percentage
@@ -137,6 +138,9 @@ def main(dataset_path, embedings_path, score_path):
 
 
 if __name__ == "__main__":
+
     main("dataset_exp_3", "embedings_exp_3", "scores_exp_3")
+
     print('EXPERIMENT 3 DONE')
+
     main("dataset_exp_4", "embedings_exp_4", "scores_exp_4")

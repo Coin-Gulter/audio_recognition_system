@@ -95,9 +95,9 @@ def evaluate_pipeline(
             else:
                 distance_other.append(distance)
 
-    ee_rate, _, fa_rate, fr_rate = compute_eer(scores, labels)
-    min_dcf = compute_min_dcf(fr_rate, fa_rate)
     fa_score, fr_score = compute_far_frr(scores, labels, thresh)
+    min_dcf = compute_min_dcf(fr_score, fa_score)
+    ee_rate = (fr_score + fa_score)/2
     
     predictions = [1 if score >= thresh else 0 for score in scores]
 

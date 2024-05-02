@@ -4,6 +4,7 @@ __pycache__/
 *.mp3
 *.pyo
 *.pyc
+*.json
 *.zip
 Pipfile
 .ipynb_checkpoints/
